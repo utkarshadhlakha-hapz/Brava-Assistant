@@ -5,8 +5,8 @@ import numpy as np
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from openai import OpenAI
+from fastembed import TextEmbedding
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
 
 load_dotenv()  # reads OPENAI_API_KEY, OPENAI_MODEL, MIN_SCORE from .env in this folder
 
@@ -15,7 +15,7 @@ TOP_K = 4
 NOT_DOCUMENTED = "That isn't covered in the project documentation."
 
 app = FastAPI()
-model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+model = TextEmbedding("BAAI/bge-small-en-v1.5")
 emb = np.load("index/embeddings.npy")
 chunks = json.load(open("index/chunks.json", encoding="utf-8"))
 PREFIX = "Represent this sentence for searching relevant passages: "
@@ -36,7 +36,7 @@ class Ask(BaseModel):
 
 
 def retrieve(question: str, k: int):
-    q = model.encode([PREFIX + question], normalize_embeddings=True)[0]
+    q = next(iter(model.embed([PREFIX + question])))
     scores = emb @ q
     top = np.argsort(-scores)[:k]
     return [{**chunks[i], "score": float(scores[i])} for i in top]

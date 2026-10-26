@@ -1,8 +1,5 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
 numpy
-pymupdf
-sentence-transformers
+fastembed
 python-dotenv
 fastapi
 uvicorn
